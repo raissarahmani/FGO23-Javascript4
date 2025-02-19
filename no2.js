@@ -11,7 +11,7 @@ const getUser = new Promise((resolve, reject) => {
 })
 const getWishlistFromUser = (username) => {
     return new Promise((resolve, reject) => {
-        if (username !== "string") return reject (new Error("terjadi kesalahan di getWishlistFromUser"))
+        if (typeof username !== "string") return reject (new Error("terjadi kesalahan di getWishlistFromUser"))
         const success = true
         const wishlist = [
             {
@@ -35,21 +35,27 @@ const getWishlistFromUser = (username) => {
 }
 const getTotalPurchase = (wishlistProduct) => {
     if (!(wishlistProduct instanceof Array)) return
-    wishlistProduct.forEach((el) => {
-        const totalPch = (el.harga)*(el.qty)
-    })
+    let totalPurchase = 0
+    wishlistProduct.forEach((el) => 
+        totalPurchase += (el.harga)*(el.qty)
+    )
+    let disc = 0
+    if (totalPurchase >= 500000 && totalPurchase <= 1000000) {
+        disc = 0.05
+    } else if (totalPurchase > 1000000) {
+        disc = 0.1
+    }
+    return {totalPurchase, disc}
 }
 
 const grandTotal = async function() {
     try {
         const user = await getUser
-        const {id} = user
-        if (typeof id !== "number") throw new Error("id has wrong type")
-        const wishlist = await getWishlistFromUser(username)
-        wishlist.forEach((el) => {
-            const {harga, qty} = el
-            console.log(`${totalPch}`)
-        })
+        const wishlist = await getWishlistFromUser(user.username)
+        const {totalPurchase, disc} = getTotalPurchase(wishlist)
+        console.log(`Total pembelian: ${totalPurchase}
+Diskon: ${disc*100}%
+Grand total: ${totalPurchase-(disc*totalPurchase)}`)
     } catch (error) {
         console.log(error.message)
     }
